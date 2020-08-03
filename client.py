@@ -24,14 +24,17 @@ while True:
 	elif command == "validate":
 		validate(ledger)
 	elif command == "add line":
+		print("> Line to add:")
 		text = input(">> ")
 		addLine(ledger,text)
 	elif command == "set ledger":
+		print("> Set ledger:")
 		text = input(">> ")
 		ledger = text
 	elif command == "compare":
 		l = []
 		while True:
+			print("> Ledgers to compare:")
 			text = input(">> ")
 
 			if text == "end" or text == "":
@@ -42,6 +45,7 @@ while True:
 	elif command == "get ledger":
 		print(ledger)
 	elif command == "add ledger":
+		print("> Ledger name:")
 		n = input(">> ")
 		f = open(n,"w+")
 		f.write("@@0\n" + "69567d2a452f3e1de45ce48026a9767b::" + str(datetime.datetime.now()) + "::" + str(uid))
