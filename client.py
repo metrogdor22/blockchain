@@ -44,7 +44,7 @@ while True:
 	elif command == "add ledger":
 		n = input(">> ")
 		f = open(n,"w+")
-		f.write("@@0\n" + "69567d2a452f3e1de45ce48026a9767b::" + str(datetime.datetime.now()))
+		f.write("@@0\n" + "69567d2a452f3e1de45ce48026a9767b::" + str(datetime.datetime.now()) + "::" + str(uid))
 		f.close()
 		print("Created " + n)
 
@@ -52,10 +52,10 @@ while True:
 		text = input(">> ")
 		addLineToPool(text)
 	elif command == "commit":
-		commitPool(ledger)
+		commitPool(ledger,uid)
 	elif command == "set uid":
 		uid = input(">> ")
 	elif command == "mine":
-		os.system('python %CD%\\miner.py')
+		mine(input(">> Starting number: "),input(">> Difficulty: "), uid)
 	else:
 		print("Unknown command")

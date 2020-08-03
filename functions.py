@@ -17,7 +17,7 @@ def getCurrentBlock(ledger):
 	f.close()
 
 # Adds a block to a ledger
-def addBlock(ledger):
+def addBlock(ledger, uid):
 	curBlock = getCurrentBlock(ledger)
 	f = open(ledger,"r+")
 	lines = f.readlines()
@@ -30,16 +30,15 @@ def addBlock(ledger):
 				prevBlockN = n
 
 			curBlockN = len(lines)
-			#print(prevBlockN)
+
 
 	lines[len(lines)-1] = str(lines[len(lines)-1]) + "\n"
-	#print("prev " + str(prevBlockN))
-	#print("cur " + str(curBlockN-1))
+
 	prevBlockHash = hashlib.md5(''.join(lines[prevBlockN:curBlockN-1]).encode('utf-8')).hexdigest()
 
-	f.write("\n@@" + str((int(curBlock) + 1)) + "\n" + prevBlockHash + "::" + str(datetime.datetime.now()))
+	f.write("\n@@" + str((int(curBlock) + 1)) + "\n" + prevBlockHash + "::" + str(datetime.datetime.now()) + "::" + str(uid))
 	
-	#print(lines[prevBlockN-1:curBlockN])
+
 	print("Wrote hash " + prevBlockHash + " and added block " + str((int(curBlock) + 1)))
 	f.close()
 
@@ -50,20 +49,15 @@ def validate(ledger):
 	prevBlockStartLine = 1
 
 	for n, line in enumerate(lines):
-		#print(prevBlockStartLine)
+
 		if line[0] == line[1] == "@" and int(line[2]) > 0:
 			prevBlockHashInLedger = lines[n+1][0:32]
-			#
-			
-			#print(lines[prevBlockStartLine-1:n-1])
-			#print("prev " + str(prevBlockStartLine-1))
-			#print("cur " + str(n))
-			#print(hashlib.md5(''.join(lines[prevBlockStartLine-1:n-1]).encode('utf-8')).hexdigest())
-			calcPrevBlockHash = hashlib.md5(''.join(lines[prevBlockStartLine-1:n-1]).encode('utf-8')).hexdigest()
-			#print("Calculated Previous Block Hash: " + str(calcPrevBlockHash))
 
-			print("Block " + line[2] + " Hash In Ledger: " + str.rstrip(prevBlockHashInLedger))
-			print("Calculated Block " + line[2] + " Hash: " + str(calcPrevBlockHash))
+			calcPrevBlockHash = hashlib.md5(''.join(lines[prevBlockStartLine-1:n-1]).encode('utf-8')).hexdigest()
+
+
+			print("Block " + str(int(line[2])-1) + " Hash In Ledger: " + str.rstrip(prevBlockHashInLedger))
+			print("Calculated Block " + str(int(line[2])-1) + " Hash: " + str(calcPrevBlockHash))
 
 			if str.rstrip(prevBlockHashInLedger) == calcPrevBlockHash:
 				print("VALID\n")
@@ -71,7 +65,7 @@ def validate(ledger):
 				print("INVALID\n")
 
 			prevBlockStartLine = n+1
-			#print(prevBlockStartLine)
+
 	f.close()
 
 # Adds a line to a ledger
@@ -123,17 +117,17 @@ def addLineToPool(text):
 	f.close()
 
 # Commits the temporary pool of transactions to a ledger
-def commitPool(ledger):
+def commitPool(ledger, uid):
 	p = open("pool","r")
 	lines = p.readlines()
-	print("Committing transactions: ")
+	print("Committing transactions:\n")
 	for line in lines:
 		if line != "" and line != "\n":
-			#print(line.strip())
+
 			addLine(ledger,line.strip())
 
-	print("To " + ledger)
-	addBlock(ledger)
+	print("To " + ledger + "\n")
+	addBlock(ledger, uid)
 	p.close()
 	open("pool","w").close()
 
@@ -148,8 +142,30 @@ def checkEqual(text):
 	return equal
 
 # Finds a hash that starts with [difficulty] 0s between [start] and 2147483647. Returns [the number][it's hash]
-def findHash(start,difficulty):
+def findHash(start, difficulty):
 	for i in range(start,2147483647):
 		h = hashlib.md5(str(i).encode('utf-8')).hexdigest()
 		if checkEqual(str(h)[0:difficulty]):
 			return str(i),str(h)
+
+# Begins mining
+def mine(start, difficulty, uid):
+	# Find first hashes for difficulty 0-10
+
+	# 0 0 cfcd208495d565ef66e7dff9f98764da
+	# 1 0 cfcd208495d565ef66e7dff9f98764da
+	# 2 168  006f52e9102a8d3be2fe5614f42ba989
+	# 3 1970 0004d0b59e19461ff126e3a08a814c33
+	# 4 5329 00003e3b9e5336685200ae85d21b4f5e
+	# 5 1803305 00000f7264c27ba6fea0c837ed6aa0aa
+	# 6 20412333 0000002760a7f6313eb52ef22f47137a
+
+	prevStart = int(start)
+	print("Difficulty    n    md5(n)    time to calculate")
+
+	t = datetime.datetime.now()
+	h = findHash(int(prevStart),int(difficulty))
+	prevStart = h[0]
+	prevHash = h[1]
+
+	print(str(difficulty) + " " + prevStart + " " + prevHash + " " + str(datetime.datetime.now()-t))
