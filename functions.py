@@ -33,10 +33,11 @@ def addBlock(ledger):
 			#print(prevBlockN)
 
 	lines[len(lines)-1] = str(lines[len(lines)-1]) + "\n"
+	#print("prev " + str(prevBlockN))
+	#print("cur " + str(curBlockN-1))
+	prevBlockHash = hashlib.md5(''.join(lines[prevBlockN:curBlockN-1]).encode('utf-8')).hexdigest()
 
-	prevBlockHash = hashlib.md5(''.join(lines[prevBlockN-1:curBlockN]).encode('utf-8')).hexdigest()
-
-	f.write("\n" + prevBlockHash + "\n" + "@@" + str((int(curBlock) + 1)))
+	f.write("\n@@" + str((int(curBlock) + 1)) + "\n" + prevBlockHash + "::" + str(datetime.datetime.now()))
 	
 	#print(lines[prevBlockN-1:curBlockN])
 	print("Wrote hash " + prevBlockHash + " and added block " + str((int(curBlock) + 1)))
@@ -49,11 +50,14 @@ def validate(ledger):
 	prevBlockStartLine = 1
 
 	for n, line in enumerate(lines):
-		if line[0] == line[1] == "@":
-			prevBlockHashInLedger = lines[n-1]
+		#print(prevBlockStartLine)
+		if line[0] == line[1] == "@" and int(line[2]) > 0:
+			prevBlockHashInLedger = lines[n+1][0:32]
 			#
 			
 			#print(lines[prevBlockStartLine-1:n-1])
+			#print("prev " + str(prevBlockStartLine-1))
+			#print("cur " + str(n))
 			#print(hashlib.md5(''.join(lines[prevBlockStartLine-1:n-1]).encode('utf-8')).hexdigest())
 			calcPrevBlockHash = hashlib.md5(''.join(lines[prevBlockStartLine-1:n-1]).encode('utf-8')).hexdigest()
 			#print("Calculated Previous Block Hash: " + str(calcPrevBlockHash))
@@ -66,13 +70,16 @@ def validate(ledger):
 			else:
 				print("INVALID\n")
 
-			prevBlockStartLine = n
+			prevBlockStartLine = n+1
+			#print(prevBlockStartLine)
 	f.close()
 
 # Adds a line to a ledger
 def addLine(ledger, text):
 	f = open(ledger,"a")
-	f.write("\n" + text)
+	now = str(datetime.datetime.now())
+	f.write("\n" + text + "::" + now + "::" + hashlib.md5((text + now).encode('utf-8')).hexdigest())
+	print(text + "::" + now + "::" + hashlib.md5((text + now).encode('utf-8')).hexdigest())
 	f.close()
 
 # Compares a list of ledgers' hashes, returning the odd one out
@@ -90,20 +97,20 @@ def compare(ledgers):
 
 # Prints help text
 def help():
-	print("Command Line Test v0.6\n")
+	print("Command Line Test v0.7\n")
 	print("exit/blank - exit")
 	print("clear - clear the screen")
 	print("help - show this help text")
 	print("add block - add a block")
 	print("get block - get the current block number")
-	print("validate - validate the ledger")
-	print("add line - add a line")
-	print("set ledger - change the current ledger")
-	print("compare - return the ledger that does not match")
+	print("add line - add a line to the ledger")
 	print("get ledger - return the current ledger")
 	print("add ledger - create a new ledger")
+	print("set ledger - change the current ledger")
+	print("validate - validate the ledger")
+	print("compare - return the ledger that does not match")
 	print("transact - add a transaction to the pool")
-	print("commit - insert the pool as a new block")
+	print("commit - insert the pool as a new block into the ledger")
 	print("set uid - set user ID")
 	print("\n")
 
@@ -122,7 +129,7 @@ def commitPool(ledger):
 	print("Committing transactions: ")
 	for line in lines:
 		if line != "" and line != "\n":
-			print(line.strip())
+			#print(line.strip())
 			addLine(ledger,line.strip())
 
 	print("To " + ledger)

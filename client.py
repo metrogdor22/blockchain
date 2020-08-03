@@ -44,7 +44,7 @@ while True:
 	elif command == "add ledger":
 		n = input(">> ")
 		f = open(n,"w+")
-		f.write("d41d8cd98f00b204e9800998ecf8427e\n@@0")
+		f.write("@@0\n" + "69567d2a452f3e1de45ce48026a9767b::" + str(datetime.datetime.now()))
 		f.close()
 		print("Created " + n)
 
