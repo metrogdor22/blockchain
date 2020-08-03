@@ -3,6 +3,7 @@ import os
 import statistics
 import datetime
 
+# Returns the most recent block in a ledger
 def getCurrentBlock(ledger):
 	curBlock = -1
 	f = open(ledger,"r")
@@ -15,6 +16,7 @@ def getCurrentBlock(ledger):
 	return curBlock
 	f.close()
 
+# Adds a block to a ledger
 def addBlock(ledger):
 	curBlock = getCurrentBlock(ledger)
 	f = open(ledger,"r+")
@@ -40,6 +42,7 @@ def addBlock(ledger):
 	print("Wrote hash " + prevBlockHash + " and added block " + str((int(curBlock) + 1)))
 	f.close()
 
+# Validates a ledger
 def validate(ledger):
 	f = open(ledger,"r")
 	lines = f.readlines()
@@ -66,11 +69,13 @@ def validate(ledger):
 			prevBlockStartLine = n
 	f.close()
 
+# Adds a line to a ledger
 def addLine(ledger, text):
 	f = open(ledger,"a")
 	f.write("\n" + text)
 	f.close()
 
+# Compares a list of ledgers' hashes, returning the odd one out
 def compare(ledgers):
 	l = []
 	for ledger in ledgers:
@@ -83,6 +88,7 @@ def compare(ledgers):
 			return ledgers[i]
 	return -1 
 
+# Prints help text
 def help():
 	print("Command Line Test v0.6\n")
 	print("exit/blank - exit")
@@ -98,8 +104,10 @@ def help():
 	print("add ledger - create a new ledger")
 	print("transact - add a transaction to the pool")
 	print("commit - insert the pool as a new block")
+	print("set uid - set user ID")
 	print("\n")
 
+# Adds a line to a temporary pool of transactions
 def addLineToPool(text):
 	f = open("pool","a")
 	now = str(datetime.datetime.now())
@@ -107,6 +115,7 @@ def addLineToPool(text):
 	print(text + "::" + now + "::" + hashlib.md5((text + now).encode('utf-8')).hexdigest())
 	f.close()
 
+# Commits the temporary pool of transactions to a ledger
 def commitPool(ledger):
 	p = open("pool","r")
 	lines = p.readlines()
@@ -121,6 +130,7 @@ def commitPool(ledger):
 	p.close()
 	open("pool","w").close()
 
+# Returns True if a string of text is all the same character
 def checkEqual(text):
 	equal = True
 	for i,j in enumerate(text):
@@ -130,17 +140,9 @@ def checkEqual(text):
 				break
 	return equal
 
+# Finds a hash that starts with [difficulty] 0s between [start] and 2147483647. Returns [the number][it's hash]
 def findHash(start,difficulty):
 	for i in range(start,2147483647):
 		h = hashlib.md5(str(i).encode('utf-8')).hexdigest()
 		if checkEqual(str(h)[0:difficulty]):
 			return str(i),str(h)
-
-prevStart = 0
-for i in range(0,10):
-	t = datetime.datetime.now()
-	h = findHash(int(prevStart),i)
-	prevStart = h[0]
-	prevHash = h[1]
-
-	print(str(i) + " " + prevStart + " " + prevHash + " " + str(datetime.datetime.now()-t))

@@ -2,7 +2,7 @@ from functions import *
 
 ledger = "ledger"
 command = ""
-#helpText = 
+uid = 0
 
 os.system('cls')
 help()
@@ -53,3 +53,9 @@ while True:
 		addLineToPool(text)
 	elif command == "commit":
 		commitPool(ledger)
+	elif command == "set uid":
+		uid = input(">> ")
+	elif command == "mine":
+		os.system('python %CD%\\miner.py')
+	else:
+		print("Unknown command")
