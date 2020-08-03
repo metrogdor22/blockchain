@@ -62,4 +62,4 @@ while True:
 	elif command == "mine":
 		mine(input(">> Starting number: "),input(">> Difficulty: "), uid)
 	else:
-		print("Unknown command")
+		print("Unknown command") 
