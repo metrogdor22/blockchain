@@ -106,6 +106,7 @@ def help():
 	print("transact - add a transaction to the pool")
 	print("commit - insert the pool as a new block into the ledger")
 	print("set uid - set user ID")
+	print("mine - begin mining")
 	print("\n")
 
 # Adds a line to a temporary pool of transactions
@@ -120,16 +121,19 @@ def addLineToPool(text):
 def commitPool(ledger, uid):
 	p = open("pool","r")
 	lines = p.readlines()
-	print("Committing transactions:\n")
-	for line in lines:
-		if line != "" and line != "\n":
+	if len(lines) > 0:
+		print("Committing transactions:\n")
+		for line in lines:
+			if line != "" and line != "\n":
 
-			addLine(ledger,line.strip())
+				addLine(ledger,line.strip())
 
-	print("To " + ledger + "\n")
-	addBlock(ledger, uid)
-	p.close()
-	open("pool","w").close()
+		print("To " + ledger + "\n")
+		addBlock(ledger, uid)
+		p.close()
+		open("pool","w").close()
+	else:
+		print("Pool's closed")
 
 # Returns True if a string of text is all the same character
 def checkEqual(text):
@@ -161,11 +165,15 @@ def mine(start, difficulty, uid):
 	# 6 20412333 0000002760a7f6313eb52ef22f47137a
 
 	prevStart = int(start)
-	print("Difficulty    n    md5(n)    time to calculate")
+	print("Difficulty n         md5(n)              time to calculate")
 
 	t = datetime.datetime.now()
 	h = findHash(int(prevStart),int(difficulty))
-	prevStart = h[0]
-	prevHash = h[1]
 
-	print(str(difficulty) + " " + prevStart + " " + prevHash + " " + str(datetime.datetime.now()-t))
+	if h:
+		prevStart = h[0]
+		prevHash = h[1]
+		print(str(difficulty) + " " + prevStart + " " + prevHash + " " + str(datetime.datetime.now()-t))
+
+		if input(">> Add to pool? y/n: ") == "y":
+			addLineToPool("$$" + str(uid) + "::" + str(h[0]) + "::" + str(h[1]))
